@@ -14,8 +14,7 @@ export default function Home() {
     setLoading(true);
     setError("");
     setShortUrl("");
-    try {
-      const res = await fetch("/api/shorten", {
+    try {      const res = await fetch("/api/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
@@ -24,7 +23,7 @@ export default function Home() {
       if (res.ok) {
         const base =
           process.env.NEXT_PUBLIC_BASE_DOMAIN || "http://localhost:3000";
-        setShortUrl(`${base}/${data.shortId}`);
+        setShortUrl(`${base}/${data.shortCode}`);
       } else {
         setError(data.error || "Error al acortar la URL");
       }

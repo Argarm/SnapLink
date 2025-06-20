@@ -55,13 +55,14 @@ export async function POST(req: Request) {
       console.error('Error parsing request body:', err);
       throw new Error('Invalid request body');
     });
-      // Wait for both operations to complete with a timeout
-    const [, body] = await Promise.all([
+    
+    // Wait for both operations to complete with a timeout
+    const [, bodyData] = await Promise.all([
       connectPromise,
       bodyPromise
     ]);
     
-    const { url } = body;
+    const { url } = bodyData;
     
     if (!url) {
       return new Response(

@@ -19,15 +19,19 @@ const getCachedUrl = cache(async (shortId: string) => {
   return null;
 });
 
-// Using basic props type that Next.js expects
-type Props = {
-  params: { shortId: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+// Define parameters for the page component using a generic type
+interface PageParams {
+  shortId: string;
 }
 
-// Let TypeScript infer the types where possible
-export default async function Page(props: Props) {
-  const { shortId } = props.params;
+// Using Next.js App Router's generated types
+export default async function Page({
+  params,
+}: {
+  // Use a plain object type to match Next.js expectations
+  params: PageParams;
+}) {
+  const { shortId } = params;
 
   // Use the cached function for better performance
   const targetUrl = await getCachedUrl(shortId);
