@@ -25,7 +25,7 @@ export default function ShortenPage() {
       } else {
         setError(data.error || 'Error al acortar la URL');
       }
-    } catch (err) {
+    } catch {
       setError('Error de red');
     } finally {
       setLoading(false);
