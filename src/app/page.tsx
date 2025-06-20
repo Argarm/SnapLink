@@ -143,7 +143,8 @@ export default function Home() {
                       text: "Mira este enlace acortado:",
                       url: shortUrl,
                     });
-                  } catch (_) {
+                  } catch {
+                    // Si Web Share API no está disponible, copiamos al portapapeles
                     copyToClipboard();
                   }
                 }}

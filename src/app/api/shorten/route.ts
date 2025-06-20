@@ -1,5 +1,5 @@
 import connectDB from '@/../lib/db';
-import mongoose, { Schema, models, model } from 'mongoose';
+import { Schema, models, model } from 'mongoose';
 import validator from 'validator';
 
 const UrlSchema = new Schema({
@@ -20,12 +20,11 @@ export async function POST(req: Request) {
 
   // Generar un shortId simple
   const shortId = Math.random().toString(36).substring(2, 8);
-
   // Guardar en la base de datos
   try {
-    const newUrl = await Url.create({ shortId, originalUrl: url });
+    await Url.create({ shortId, originalUrl: url });
     return new Response(JSON.stringify({ shortId }), { status: 201 });
-  } catch (error) {
+  } catch {
     return new Response(JSON.stringify({ error: 'Error al acortar la URL' }), { status: 500 });
   }
 }

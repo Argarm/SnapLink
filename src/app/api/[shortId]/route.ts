@@ -1,6 +1,6 @@
 import connectDB from '@/../lib/db';
 import { NextRequest } from 'next/server';
-import mongoose, { Schema, models, model } from 'mongoose';
+import { Schema, models, model } from 'mongoose';
 
 const UrlSchema = new Schema({
   shortId: { type: String, required: true, unique: true },
