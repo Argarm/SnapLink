@@ -10,9 +10,12 @@ const UrlSchema = new Schema({
 
 const Url = models.Url || model('Url', UrlSchema);
 
-export async function GET(req: NextRequest, { params }: { params: { shortId: string } }) {
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ shortId: string }> }
+) {
+  const { shortId } = await context.params;
   await connectDB();
-  const { shortId } = params;
   const urlDoc = await Url.findOne({ shortId });
   if (!urlDoc) {
     return new Response('URL no encontrada', { status: 404 });
