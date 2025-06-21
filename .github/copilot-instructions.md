@@ -1,222 +1,99 @@
----
+# Copilot Instructions for SnapLink URL Shortener
 
-**Copilot Instructions for Next.js Backend Setup**
+This document provides guidelines for AI coding assistants to effectively understand and contribute to the SnapLink URL shortener project.
 
-**Goal**: Implement the URL shortening and redirection backend logic within a new Next.js project based on the provided repository structure.
+## 1. Project Overview & Core Purpose:
 
-**Assumptions**:
-* You have an existing Next.js project created (e.g., using `npx create-next-app`).
-* You are comfortable navigating your project directory.
+SnapLink is a URL shortening service that allows users to create short, memorable links for long URLs. Its core purpose is to simplify URL sharing and management by providing a user-friendly interface for shortening URLs and handling redirections to the original long URLs.
 
----
+## 2. Technology Stack & Key Libraries/Frameworks:
 
-**Step 1: Install Backend Dependencies**
+* **Primary Language:** TypeScript, JavaScript
+* **Framework:** Next.js (App Router)
+* **Styling:** Tailwind CSS
+* **Database:** MongoDB
+* **ODM:** Mongoose
+* **Validation:** `validator` library
+* **Environment Variables:** `dotenv`
 
-* **Instruction**: Open your project's terminal and install the required backend dependencies.
-* **Command to execute**:
-    ```bash
-    npm install mongoose validator dotenv
-    ```
-* **Explanation**:
-    * `mongoose`: ODM for MongoDB.
-    * `validator`: For URL validation.
-    * `dotenv`: To load environment variables from a `.env.local` file.
+## 3. Architectural Patterns & Design Philosophy:
 
----
+The project primarily follows a **Monolithic** architecture using the **Next.js App Router** for both frontend and backend API routes.
 
-**Step 2: Configure Environment Variables**
+* **Client-Side Rendering (CSR):** Used for interactive components like the URL shortening form (`src/app/page.tsx`, `src/app/shorten/page.tsx`).
+* **Server-Side Rendering (SSR) / Static Site Generation (SSG):** Used for dynamic routing and data fetching on the server (e.g., `src/app/[shortId]/page.tsx` for redirection).
+* **API Routes:** Backend logic is exposed via Next.js API routes (`src/app/api/shorten/route.ts`, `src/app/api/[shortId]/route.ts`).
+* **Database Abstraction:** A `lib/db.js` file handles MongoDB connection logic, ensuring a single, cached connection.
+* **Mongoose Models:** Database schemas are defined using Mongoose in the `models/` directory (`models/Url.js`).
+* **Caching:** In-memory caching is implemented in API routes for frequently accessed URLs and short ID generation to improve performance.
 
-* **Instruction**: Create a `.env.local` file at the root of your Next.js project and add your MongoDB connection string and the base domain for your shortened URLs.
-* **File to create**: `.env.local`
-* **Content to add**:
-    ```dotenv
-    MONGODB_URI=your_mongodb_connection_string_here
-    BASE_DOMAIN=http://localhost:3000 # Or your deployed domain, e.g., [https://your-app.vercel.app](https://your-app.vercel.app)
-    ```
-* **Note**: Replace `your_mongodb_connection_string_here` with your actual MongoDB connection URI (e.g., from MongoDB Atlas). The `BASE_DOMAIN` should be your application's base URL.
+## 4. Coding Conventions & Style Guide:
 
----
+* **File Naming:**
+    * Next.js pages and API routes follow the framework's conventions (e.g., `page.tsx`, `route.ts`, `[param].tsx`).
+    * Utility and model files use `kebab-case` or `camelCase` (e.g., `lib/db.js`, `models/Url.js`).
+* **Indentation:** 2 spaces (inferred from code samples).
+* **Quotes:** Single quotes preferred for strings in JavaScript/TypeScript (inferred).
+* **TypeScript:** Used for type safety in Next.js components and API routes. `tsconfig.json` indicates strict typing.
+* **ESLint:** Configured with `next/core-web-vitals` and `next/typescript` for code quality.
+* **Tailwind CSS:** Classes are directly applied in JSX for styling.
 
-**Step 3: Create Database Connection Utility**
+## 5. Build System & CI/CD:
 
-* **Instruction**: Create a `lib` directory at the root of your project (if it doesn't exist) and then create `db.js` inside it for your MongoDB connection.
-* **File to create**: `lib/db.js`
-* **Content to add**:
-    ```javascript
-    // lib/db.js
-    const mongoose = require('mongoose');
+* **Build Tool:** Next.js CLI `next build`
+* **Package Manager:** npm (or yarn/pnpm/bun based on `package.json` scripts).
+* **CI/CD:** No explicit CI/CD configuration files are provided, but deployment on Vercel is mentioned in the `README.md`.
 
-    let isConnected = false;
+## 6. Testing Strategy & Frameworks:
 
-    const connectDB = async () => {
-        if (isConnected) {
-            console.log('Using existing database connection');
-            return;
-        }
+No specific testing frameworks or established testing practices are discernible from the provided codebase.
 
-        try {
-            await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/urlshortener');
-            isConnected = true;
-            console.log('MongoDB connected');
-        } catch (error) {
-            console.error('MongoDB connection error:', error);
-            process.exit(1);
-        }
-    };
+## 7. Key Modules/Services & Their Responsibilities:
 
-    module.exports = connectDB;
-    ```
-* **Citations**: The content is derived from `config/db.js` and `api/index.js` in the provided `repomix-output.xml`.
+* `lib/db.js`: Manages the MongoDB connection, including connection pooling, cooldowns, and error handling for robust database access.
+* `models/Url.js`: Defines the Mongoose schema for URL documents, including `longUrl`, `shortCode`, `createdAt`, and `clicks`. It also includes schema-level indexes and static helper methods for common queries.
+* `src/app/api/shorten/route.ts`: Handles the API endpoint for URL shortening, including URL validation, unique short ID generation (with collision handling and caching), and saving new URLs to the database.
+* `src/app/[shortId]/page.tsx` (or `src/app/api/[shortId]/route.ts`): Handles the dynamic routing for shortened URLs, retrieves the original URL from the database, increments click counts, and performs a redirect.
+* `src/app/page.tsx` (or `src/app/shorten/page.tsx`): The main frontend page responsible for displaying the URL shortening form, handling user input, and displaying the shortened URL.
 
----
+## 8. API Usage Guidelines (Internal/External):
 
-**Step 4: Define URL Mongoose Model**
+* **Internal API:**
+    * URL shortening endpoint: `POST /api/shorten`. Expects a JSON body with a `url` field. Returns a `shortCode`.
+    * URL redirection: `GET /[shortId]`. This is handled by a dynamic Next.js page or API route that redirects to the `longUrl`.
+* **Validation:** All incoming URLs to the `/api/shorten` endpoint must be validated using `validator.isURL` and must include a protocol (e.g., `http://` or `https://`).
+* **Error Handling:** API endpoints return JSON objects with an `error` field on failure and appropriate HTTP status codes (e.g., 400 for bad requests, 500 for server errors, 404 for not found).
 
-* **Instruction**: Create a `models` directory at the root of your project (if it doesn't exist) and then create `Url.js` inside it to define your Mongoose schema for URLs.
-* **File to create**: `models/Url.js`
-* **Content to add**:
-    ```javascript
-    // models/Url.js
-    const mongoose = require('mongoose');
+## 9. Security Best Practices (if evident):
 
-    const urlSchema = new mongoose.Schema({
-        longUrl: { type: String, required: true },
-        shortCode: { type: String, required: true, unique: true },
-        createdAt: { type: Date, default: Date.now },
-        clicks: { type: Number, default: 0 },
-    });
+* **Environment Variables:** Sensitive information like `MONGODB_URI` is loaded from `.env.local` using `dotenv`.
+* **Input Validation:** URLs are explicitly validated using the `validator` library to prevent invalid input.
+* **Connection Security:** Mongoose connection options include `useNewUrlParser` and `useUnifiedTopology`.
+* **TTL Index:** URLs in the database have a Time-To-Live (TTL) index set to 90 days, meaning they will automatically expire, helping to manage data and potentially reducing the attack surface by removing old links.
 
-    module.exports = mongoose.models.URL || mongoose.model('URL', urlSchema);
-    ```
-* **Citations**: The content is derived from `models/url.js` in the provided `repomix-output.xml`.
-* **Note**: `mongoose.models.URL || mongoose.model('URL', urlSchema)` is a common pattern in Next.js to prevent `OverwriteModelError`.
+## 10. Common Pitfalls & "Gotchas" (Optional - if inferable):
+
+* **Mongoose OverwriteModelError:** The `mongoose.models.URL || mongoose.model('URL', urlSchema)` pattern is used in `models/Url.js` to prevent this common Next.js issue during hot reloading in development.
+* **Database Connection Management:** The `lib/db.js` utility ensures a single, persistent database connection and handles connection errors and reconnections, which is crucial for serverless environments like Next.js API routes.
+* **Short ID Collisions:** The `generateUniqueShortId` function in `src/app/api/shorten/route.ts` includes retry logic and falls back to a timestamp-based ID to mitigate collision risks, especially under high load.
+* **Caching Strategy:** Simple in-memory caches are used for URL lookups and newly generated short IDs. This cache is not persistent across serverless function invocations and has a TTL, so it's a best-effort optimization.
+
+## 11. Important Scripts & Tooling:
+
+* `npm run dev`: Starts the Next.js development server with Turbopack enabled for faster compilation.
+* `npm run build`: Builds the Next.js application for production.
+* `npm run start`: Starts the Next.js production server.
+* `npm run lint`: Runs ESLint for code linting.
 
 ---
 
-**Step 5: Create API Endpoint for URL Shortening**
+**Instructions for the AI Assistant:**
 
-* **Instruction**: Create the directory `pages/api` (if it doesn't exist) and then create `shorten.js` inside it. This will be your API endpoint for shortening URLs.
-* **File to create**: `pages/api/shorten.js`
-* **Content to add**:
-    ```javascript
-    // pages/api/shorten.js
-    const connectDB = require('../../lib/db');
-    const URL = require('../../models/Url');
-    const validator = require('validator');
-
-    function generateShortCode() {
-        return Math.random().toString(36).substring(2, 8);
-    }
-
-    export default async function handler(req, res) {
-        await connectDB(); // Ensure DB connection for each request
-
-        if (req.method === 'POST') {
-            try {
-                const { long_url } = req.body;
-                if (!long_url) {
-                    return res.status(400).json({ error: 'URL is required' });
-                }
-                if (!validator.isURL(long_url)) {
-                    return res.status(400).json({ error: 'Invalid URL format' });
-                }
-
-                let shortCode;
-                let isUnique = false;
-                while (!isUnique) {
-                    shortCode = generateShortCode();
-                    const existingUrl = await URL.findOne({ shortCode });
-                    if (!existingUrl) {
-                        isUnique = true;
-                    }
-                }
-
-                const newUrl = new URL({ longUrl: long_url, shortCode });
-                await newUrl.save();
-
-                const baseDomain = process.env.BASE_DOMAIN;
-                const shortUrl = `${baseDomain}/${shortCode}`;
-
-                return res.status(201).json({ shortUrl, longUrl: long_url });
-            } catch (error) {
-                console.error(error);
-                return res.status(500).json({ error: 'Server error' });
-            }
-        } else {
-            res.setHeader('Allow', ['POST']);
-            res.status(405).end(`Method ${req.method} Not Allowed`);
-        }
-    }
-    ```
-* **Citations**: This code integrates logic from `controllers/shortenController.js` and `routes/shorten.js` into a Next.js API route structure. It also uses the `connectDB` function from `lib/db.js`.
-
----
-
-**Step 6: Create Dynamic Page for URL Redirection**
-
-* **Instruction**: Create a file named `[shortCode].js` directly inside the `pages` directory. This will handle the redirection for shortened URLs.
-* **File to create**: `pages/[shortCode].js`
-* **Content to add**:
-    ```javascript
-    // pages/[shortCode].js
-    const connectDB = require('../lib/db');
-    const URL = require('../models/Url');
-
-    export async function getServerSideProps(context) {
-        await connectDB(); // Ensure DB connection
-
-        const { shortCode } = context.params;
-
-        if (!shortCode) {
-            return {
-                notFound: true,
-            };
-        }
-
-        try {
-            const urlEntry = await URL.findOne({ shortCode });
-
-            if (!urlEntry) {
-                return {
-                    notFound: true,
-                };
-            }
-
-            // Increment the click counter
-            urlEntry.clicks = (urlEntry.clicks || 0) + 1;
-            await urlEntry.save();
-
-            // Redirect to the long URL
-            return {
-                redirect: {
-                    destination: urlEntry.longUrl,
-                    permanent: true, // Use 301 for permanent redirect
-                },
-            };
-        } catch (error) {
-            console.error('Redirection error:', error);
-            // In case of a server error, you might want to redirect to a generic error page
-            return {
-                redirect: {
-                    destination: '/error', // Or any other error page you have
-                    permanent: false,
-                },
-            };
-        }
-    }
-
-    // This component will not be rendered as we are using redirects in getServerSideProps
-    export default function ShortCodePage() {
-        return (
-            <div>
-                <h1>Redirecting...</h1>
-                <p>If you are not redirected, please check the URL.</p>
-            </div>
-        );
-    }
-    ```
-* **Citations**: This code adapts the `redirectToLongUrl` logic from `controllers/shortenController.js` for `getServerSideProps` in Next.js. It also uses the `connectDB` function from `lib/db.js`.
-
----
-
-**Final Backend Structure in Next.js:**
+* When generating code, strictly adhere to the identified coding conventions and architectural patterns.
+* Prioritize using the specified key libraries and frameworks for new functionality.
+* Ensure new code is consistent with the testing strategy (or lack thereof, implying no new testing frameworks should be introduced without discussion).
+* If unsure about a specific convention not covered, ask for clarification rather than making assumptions.
+* When refactoring, maintain or improve adherence to the project's established patterns, especially regarding database connection, Mongoose model usage, and API route structure.
+* Pay close attention to URL validation and error handling in API routes.
+* When proposing changes related to database interactions, consider the performance optimizations and connection management implemented in `lib/db.js` and `models/Url.js`.
+* For frontend changes, prioritize using Tailwind CSS for styling and follow Next.js App Router conventions.
