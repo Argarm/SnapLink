@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import AppHeader from '../components/AppHeader'
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -44,29 +45,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center pt-16 px-4">
-      <header className="w-full flex items-center justify-between p-4 absolute top-0 left-0 z-10">
-        <div className="flex gap-2">
-          <Link href="/">
-            <span className="text-3xl font-extrabold text-blue-700 hover:underline cursor-pointer">
-              SnapLink
-            </span>
-          </Link>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            href="/auth/login"
-            className="px-5 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-          >
-            Iniciar sesión
-          </Link>
-          <Link
-            href="/auth/register"
-            className="px-5 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
-          >
-            Registrarse
-          </Link>
-        </div>
-      </header>
+      <AppHeader />
 
       <div className="flex flex-col flex-grow w-full items-center">
         {/* Hero Section */}
