@@ -1,60 +1,32 @@
 import connectDB from '@/../lib/db';
 import URL from '@/../models/Url';
-import validator from 'validator';
-
-// Optimized shortId generator with better collision handling
-async function generateUniqueShortId() {
-  const maxAttempts = 5; // Limit attempts to prevent infinite loops
-  let attempts = 0;
-  
-  // Pre-generate shortIds for better performance
-  const generateId = () => Math.random().toString(36).substring(2, 8);
-  
-  // Try to find a unique ID efficiently
-  while (attempts < maxAttempts) {
-    const shortId = generateId();
-    
-    // Check if it already exists (with lean query for performance)
-    // Use a timeout to prevent long-running queries
-    try {
-      const existing = await Promise.race([
-        URL.findOne({ shortCode: shortId }).lean().select('_id'),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('DB lookup timeout')), 1000)
-        )
-      ]);
-      
-      if (!existing) {
-        return shortId;
-      }
-    } catch (err) {
-      console.warn('ID lookup error, generating new one:', err);
-      // On timeout, just try another ID
-    }
-    
-    attempts++;
-  }
-  
-  // In case of repeated collisions, use timestamp for uniqueness
-  const timestamp = Date.now().toString(36).slice(-4);
-  return generateId().substring(0, 4) + timestamp;
-}
+import { isValidUrl } from '@/../lib/validateUrl';
+import { errorResponse } from '@/../lib/errorResponse';
+import { SimpleCache } from '@/../lib/cache';
+import { generateUniqueShortId } from '@/../lib/generateShortId';
 
 // Cache recently created URLs to avoid database hits
-const urlCache = new Map();
 const URL_CACHE_SIZE = 100; // Maximum cache size
 const URL_CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+const urlCache = new SimpleCache<string, string>(URL_CACHE_SIZE, URL_CACHE_TTL);
 
-export async function POST(req: Request) {
+interface ShortenRequestBody {
+  url: string
+}
+
+interface ShortenResponse {
+  shortCode: string
+  cached?: boolean
+  error?: string
+}
+
+export async function POST(req: Request): Promise<Response> {
   try {
     // Start the database connection early while processing the request
     const connectPromise = connectDB();
     
     // Parse request body with timeout
-    const bodyPromise = req.json().catch(err => {
-      console.error('Error parsing request body:', err);
-      throw new Error('Invalid request body');
-    });
+    const bodyPromise = req.json() as Promise<ShortenRequestBody>;
     
     // Wait for both operations to complete with a timeout
     const [, bodyData] = await Promise.all([
@@ -65,39 +37,25 @@ export async function POST(req: Request) {
     const { url } = bodyData;
     
     if (!url) {
-      return new Response(
-        JSON.stringify({ error: 'URL is required' }), 
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' } 
-        }
-      );
+      return errorResponse(400, 'URL is required');
     }
     
     // Validate URL format with proper error message
-    if (!validator.isURL(url, { require_protocol: true })) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'URL inválida. Asegúrate de incluir el protocolo (http:// o https://)'
-        }), 
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' } 
-        }
-      );
+    if (!isValidUrl(url)) {
+      return errorResponse(400, 'URL inválida. Asegúrate de incluir el protocolo (http:// o https://)');
     }
     
     // Check cache first to avoid unnecessary DB operations
     const cacheKey = `orig-${url}`;
     if (urlCache.has(cacheKey)) {
-      const shortCode = urlCache.get(cacheKey);
+      const shortCode = urlCache.get(cacheKey) as string;
       return new Response(
-        JSON.stringify({ shortCode, cached: true }), 
-        { 
+        JSON.stringify({ shortCode, cached: true } as ShortenResponse),
+        {
           status: 200,
-          headers: { 'Content-Type': 'application/json' } 
+          headers: { 'Content-Type': 'application/json' }
         }
-      );
+      )
     }
     
     // Generate shortId with timeout protection
@@ -122,34 +80,20 @@ export async function POST(req: Request) {
     ]);
     
     // Update cache - maintain cache size limit
-    if (urlCache.size >= URL_CACHE_SIZE) {
-      // Remove oldest entry
-      const firstKey = urlCache.keys().next().value;
-      urlCache.delete(firstKey);
-    }
     urlCache.set(cacheKey, shortCode);
-    setTimeout(() => urlCache.delete(cacheKey), URL_CACHE_TTL);
     
     return new Response(
-      JSON.stringify({ shortCode }), 
-      { 
+      JSON.stringify({ shortCode } as ShortenResponse),
+      {
         status: 201,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-store' 
+          'Cache-Control': 'no-store'
         }
       }
-    );
+    )
   } catch (error) {
     console.error('Error shortening URL:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Error al acortar la URL. Por favor, intenta de nuevo.'
-      }),
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+    return errorResponse(500, 'Error al acortar la URL. Por favor, intenta de nuevo.');
   }
 }
