@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 SnapLink · URL Shortener
 
-## Getting Started
+SnapLink es un servicio moderno para acortar URLs, pensado para compartir enlaces de forma rápida, elegante y segura.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Características
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 🔗 Acorta URLs largas en segundos
+- ⚡ Redirección instantánea y seguimiento de clics
+- 🛡️ Validación y seguridad integradas
+- 🗑️ Expiración automática de enlaces (TTL 90 días)
+- 🖥️ Interfaz intuitiva y responsiva (Next.js + Tailwind CSS)
+- 🚀 Listo para despliegue en Vercel
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📸 Demo
 
-## Learn More
+![Demo](public/demo.gif)
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tecnologías
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Next.js** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **MongoDB** + **Mongoose**
+- **Validator.js**
+- **Vercel** (deploy recomendado)
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Instalación y uso local
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clona el repositorio:**
+   ```bash
+   git clone https://github.com/argarm/snaplink.git
+   cd snaplink
+   ```
+
+2. **Instala dependencias:**
+   ```bash
+   npm install
+   # o yarn / pnpm / bun
+   ```
+
+3. **Configura variables de entorno:**
+   - Crea un archivo `.env.local` y agrega tu cadena de conexión de MongoDB:
+     ```
+     MONGODB_URI=mongodb://localhost:27017/snaplink
+     ```
+
+4. **Inicia el servidor de desarrollo:**
+   ```bash
+   npm run dev
+   ```
+
+5. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+
+---
+
+## 🧩 Scripts útiles
+
+- `npm run dev` — Servidor de desarrollo
+- `npm run build` — Compila para producción
+- `npm run start` — Servidor en modo producción
+- `npm run lint` — Linter de código
+
+---
+
+## 📦 Despliegue
+
+Despliega gratis en [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=snaplink) en segundos.
+
+---
+
+## 📚 Documentación
+
+- [Documentación Next.js](https://nextjs.org/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Mongoose](https://mongoosejs.com/docs/guide.html)
+
+---
+
+## 🤝 Contribuciones
+
+¡Las contribuciones son bienvenidas! Abre un issue o un pull request para sugerir mejoras.
+
+---
+
+## 📝 Licencia
+
+MIT
