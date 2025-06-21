@@ -44,7 +44,14 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center pt-16 px-4">
-      <header className="w-full flex items-center justify-end p-4 absolute top-0 right-0 z-10">
+      <header className="w-full flex items-center justify-between p-4 absolute top-0 left-0 z-10">
+        <div className="flex gap-2">
+          <Link href="/">
+            <span className="text-3xl font-extrabold text-blue-700 hover:underline cursor-pointer">
+              SnapLink
+            </span>
+          </Link>
+        </div>
         <div className="flex gap-2">
           <Link
             href="/auth/login"
