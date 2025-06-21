@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppHeader from "../../../components/AppHeader";
 
 export default function RegisterPage() {
@@ -8,6 +8,10 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    alert("La funcionalidad de registro no está disponible por ahora.");
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

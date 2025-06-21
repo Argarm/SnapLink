@@ -1,12 +1,16 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppHeader from "../../../components/AppHeader";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    alert("La funcionalidad de inicio de sesión no está disponible por ahora.");
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
