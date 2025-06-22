@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import AppHeader from '../components/AppHeader'
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -45,7 +44,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center pt-16 px-4">
-      <AppHeader />
+      {/* <AppHeader /> */}
 
       <div className="flex flex-col flex-grow w-full items-center">
         {/* Hero Section */}
