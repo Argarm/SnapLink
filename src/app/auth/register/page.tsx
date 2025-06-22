@@ -34,10 +34,11 @@ export default function RegisterPage() {
         setError(data.error || "Error desconocido");
         setSuccess("");
       } else {
-        setSuccess("¡Registro exitoso! Ahora puedes iniciar sesión.");
+        setSuccess("¡Registro exitoso! Redirigiendo...");
         setEmail("");
         setPassword("");
         setConfirmPassword("");
+        window.location.href = "/";
       }
     } catch {
       setError("Error de red o del servidor.");

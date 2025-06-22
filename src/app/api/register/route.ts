@@ -3,6 +3,10 @@ import bcrypt from 'bcryptjs';
 import validator from 'validator';
 import dbConnect from '../../../../lib/db';
 import User from '../../../../models/User';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'snaplink_dev_secret';
+const COOKIE_NAME = 'snaplink_token';
 
 export async function POST(req: Request) {
   try {
@@ -28,7 +32,17 @@ export async function POST(req: Request) {
     const user = new User({ email, password: hashedPassword });
     await user.save();
 
-    return NextResponse.json({ success: true });
+    // Generar JWT y setear cookie httpOnly igual que en login
+    const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const response = NextResponse.json({ success: true });
+    response.cookies.set(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 días
+    });
+    return response;
   } catch {
     return NextResponse.json({ error: 'Error en el servidor.' }, { status: 500 });
   }
