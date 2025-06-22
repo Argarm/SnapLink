@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +33,8 @@ export default function LoginPage() {
         setSuccess("¡Inicio de sesión exitoso!");
         setEmail("");
         setPassword("");
+        router.push("/");
+        router.refresh();
       }
     } catch {
       setError("Error de red o del servidor.");
