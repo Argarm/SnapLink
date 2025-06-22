@@ -4,6 +4,7 @@ import { isValidUrl } from '@/../lib/validateUrl';
 import { errorResponse } from '@/../lib/errorResponse';
 import { SimpleCache } from '@/../lib/cache';
 import { generateUniqueShortId } from '@/../lib/generateShortId';
+import { getUserFromRequest } from '@/../lib/auth';
 
 // Cache recently created URLs to avoid database hits
 const URL_CACHE_SIZE = 100; // Maximum cache size
@@ -65,14 +66,17 @@ export async function POST(req: Request): Promise<Response> {
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('ShortID generation timeout')), 2000)
       ) 
-    ]);
+    ]) as string;
     
+    // Obtener usuario autenticado (si existe)
+    const userPayload = getUserFromRequest(req);
     // Save to database with timeout protection
     await Promise.race([
       URL.create({ 
         shortCode, 
         longUrl: url,
-        createdAt: new Date() 
+        createdAt: new Date(),
+        user: userPayload && userPayload.userId ? userPayload.userId : undefined
       }),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Database operation timed out')), 5000)

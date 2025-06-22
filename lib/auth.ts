@@ -1,9 +1,9 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'snaplink_dev_secret';
 const COOKIE_NAME = 'snaplink_token';
 
-export function getUserFromRequest(req: Request) {
+export function getUserFromRequest(req: Request): null | { userId: string, email: string } {
   try {
     const cookieHeader = req.headers.get('cookie');
     if (!cookieHeader) return null;
@@ -13,8 +13,11 @@ export function getUserFromRequest(req: Request) {
     }));
     const token = cookies[COOKIE_NAME];
     if (!token) return null;
-    const payload = jwt.verify(token, JWT_SECRET);
-    return payload;
+    const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    if (typeof payload === 'object' && payload.userId && payload.email) {
+      return { userId: payload.userId as string, email: payload.email as string };
+    }
+    return null;
   } catch {
     return null;
   }
