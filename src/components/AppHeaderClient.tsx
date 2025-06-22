@@ -52,23 +52,32 @@ export default function AppHeaderClient({ email }: { email?: string }) {
         {email && (
           <div className="relative" ref={dropdownRef}>
             <button
-              className="px-5 py-2 rounded bg-gray-100 text-blue-700 font-semibold hover:bg-gray-200 transition focus:outline-none"
+              className="px-5 py-2 rounded bg-gray-100 text-blue-700 font-semibold hover:bg-gray-200 transition focus:outline-none flex items-center gap-2 shadow-sm border border-gray-200"
               onClick={() => setOpen((v) => !v)}
             >
-              {email}
-              <svg className="inline ml-2 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+              <span className="truncate max-w-[120px]">{email}</span>
+              <svg className={`ml-1 w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
             {open && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-20 animate-fade-in">
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-blue-100 rounded-xl shadow-2xl z-20 animate-fade-in overflow-hidden ring-1 ring-blue-100">
+                <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-100 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  <span className="font-semibold text-blue-700 text-sm truncate">{email}</span>
+                </div>
                 <Link
                   href="/auth/links"
-                  className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition"
+                  className="block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition text-sm font-medium"
                   onClick={() => setOpen(false)}
                 >
-                  Mis enlaces
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12c0 4.418-4.03 8-9 8s-9-3.582-9-8 4.03-8 9-8 9 3.582 9 8z" /></svg>
+                    Mis enlaces
+                  </span>
                 </Link>
-                <div className="border-t my-1" />
-                <LogoutButton />
+                <div className="border-t border-blue-100 my-1" />
+                <div className="px-5 py-3">
+                  <LogoutButton />
+                </div>
               </div>
             )}
           </div>
