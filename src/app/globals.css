@@ -17,3 +17,19 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+input, textarea, select {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+input::placeholder, textarea::placeholder {
+  color: #a0aec0; /* slate-400 */
+  opacity: 1;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2563eb33; /* blue-600/20 */
+  border-color: #2563eb; /* blue-600 */
+}

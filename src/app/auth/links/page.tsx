@@ -8,7 +8,11 @@ export const dynamic = 'force-dynamic';
 export default async function UserLinksPage() {
   await connectDB();
   // Obtener usuario autenticado desde cookie
-  const cookieHeader = cookies().toString();
+  const cookieStore = cookies();
+  // cookieStore es ReadonlyRequestCookies, getAll() está disponible directamente
+  // @ts-expect-error: getAll() puede no estar presente en algunas versiones, fallback a Array.from
+  const allCookies = cookieStore.getAll ? cookieStore.getAll() : Array.from(cookieStore);
+  const cookieHeader = allCookies.map((c: { name: string, value: string }) => `${c.name}=${encodeURIComponent(c.value)}`).join('; ');
   const req = { headers: { get: (k: string) => k === 'cookie' ? cookieHeader : undefined } } as unknown as Request;
   const user = getUserFromRequest(req);
 
@@ -45,7 +49,7 @@ export default async function UserLinksPage() {
       </h2>
       {links.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <svg className="w-16 h-16 text-blue-200 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          <svg className="w-16 h-16 text-blue-200 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9" /></svg>
           <p className="text-gray-500 text-lg">Aún no has acortado ningún enlace.</p>
         </div>
       ) : (

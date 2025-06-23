@@ -5,6 +5,7 @@ import LogoutButton from "./LogoutButton";
 
 export default function AppHeaderClient({ email }: { email?: string }) {
   const [open, setOpen] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,7 +33,18 @@ export default function AppHeaderClient({ email }: { email?: string }) {
           </span>
         </Link>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 md:hidden">
+        {!email && (
+          <button
+            className="p-2 rounded bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onClick={() => setMobileMenu((v) => !v)}
+            aria-label="Abrir menú"
+          >
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+        )}
+      </div>
+      <div className="gap-2 hidden md:flex">
         {!email && (
           <>
             <Link
@@ -83,6 +95,30 @@ export default function AppHeaderClient({ email }: { email?: string }) {
           </div>
         )}
       </div>
+      {/* Menú móvil */}
+      {mobileMenu && !email && (
+        <div className="fixed inset-0 z-30 bg-black/40 flex justify-end md:hidden" onClick={() => setMobileMenu(false)}>
+          <nav className="w-64 bg-white h-full shadow-lg p-8 flex flex-col gap-6 animate-slide-in-right" onClick={e => e.stopPropagation()}>
+            <button className="self-end mb-6" onClick={() => setMobileMenu(false)} aria-label="Cerrar menú">
+              <svg className="w-7 h-7 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <Link
+              href="/auth/login"
+              className="block w-full px-5 py-3 rounded bg-blue-600 text-white font-semibold text-center hover:bg-blue-700 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+              onClick={() => setMobileMenu(false)}
+            >
+              Iniciar sesión
+            </Link>
+            <Link
+              href="/auth/register"
+              className="block w-full px-5 py-3 rounded bg-green-600 text-white font-semibold text-center hover:bg-green-700 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+              onClick={() => setMobileMenu(false)}
+            >
+              Registrarse
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
